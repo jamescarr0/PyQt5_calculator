@@ -94,6 +94,7 @@ class CalculatorBrain:
         # Plus/Minus button pressed.
         if btn_id['misc'] == u"\u00B1":
             print("Plus/Minus button")
+            self.display_value = -int(self.display_value)
 
         # Percent button pressed.
         if btn_id['misc'] == "%":
