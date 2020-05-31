@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import QApplication, QGridLayout, QWidget
 from calculator_gui import CalculatorGui
 
-class Calculator():
+
+class Calculator:
     """ A general class to manage the calculator app. """
 
     def __init__(self):
