@@ -8,13 +8,16 @@ class CalculatorBrain:
         self.calculator = calculator
         self.display_value, self.first_number, self.second_number = 0, 0, 0
         self._operator = ""
+        self.equals_pressed = False
 
     @pyqtSlot()
     def button_tapped(self, btn_id):
         """ Process the button pressed. """
 
-        if type(btn_id) == dict:
+        if self.display_value == "Er":
+            self._full_reset()
 
+        if type(btn_id) == dict:
             # Operator button pressed.
             if 'operator' in btn_id.keys():
                 self._operator_pressed(btn_id)
@@ -33,6 +36,11 @@ class CalculatorBrain:
     def _number_pressed(self, btn_id):
         """ get the int value from a number button pressed event and update display. """
 
+        if self.equals_pressed:
+            self._zero_display()
+            self._update_lcd()
+            self.equals_pressed = False
+
         print(f"button {btn_id} pressed")
         if self.display_value == 0:
             self.display_value = btn_id
@@ -42,38 +50,38 @@ class CalculatorBrain:
     def _operator_pressed(self, btn_id):
         """ get the operator from an operator button pressed event. """
 
+        if not self.first_number and not self._operator:
+            print(f"Saving first number {self.display_value}")
+            self.first_number = self.display_value
+            self._zero_display()
+        else:
+            self.second_number = self.display_value
+            print(f"Saving second number {self.display_value}")
+
         # Division pressed.
         if btn_id['operator'] == u"\u00F7":
             self._operator = "//"
-            print("Division")
+            print("Division pressed")
 
         # Multiplication pressed.
         elif btn_id['operator'] == u"\u00D7":
             self._operator = "*"
-            print("Multiplication")
+            print("Multiplication button pressed")
 
         # Subtraction pressed.
         elif btn_id['operator'] == "-":
             self._operator = "-"
-            print("Subtraction")
+            print("Subtraction button pressed")
 
         # Addition pressed.
         elif btn_id['operator'] == "+":
             self._operator = "+"
-            print("Addition")
+            print("Addition button pressed")
 
         # Equals pressed.
         else:
-            print("Equals")
-            self._equals_pressed()
-
-    def _equals_pressed(self):
-        """ Equals pressed evaluate expression. """
-        # TODO
-
-    def _evaluate(self):
-        """ evaluate the current string and return answer. """
-        #TODO
+            print("Equals button pressed")
+            self._equals()
 
     def _misc_pressed(self, btn_id):
         """ Misc buttons pressed (C, decimal, plus/minus, percent). """
@@ -95,6 +103,24 @@ class CalculatorBrain:
         if btn_id['misc'] == ".":
             print("Decimal button")
 
+    def _equals(self):
+        """ Equals pressed evaluate expression. """
+        print(f"Sum to evaluate = {self.first_number}{self._operator}{self.second_number}")
+        try:
+            answer = eval(f"{self.first_number}{self._operator}{self.second_number}")
+        except ZeroDivisionError:
+            print("Zero division error")
+            answer = "Er"
+
+        print(f"\t={answer}")
+        self.display_value = answer
+        self._prepare_for_input(answer)
+
+    def _prepare_for_input(self, answer):
+        """ Prepare calculator for input after solving sum. """
+        self.first_number, self.second_number, self._operator = answer, 0, ""
+        self.equals_pressed = True
+
     def _update_lcd(self):
         """
         Update the LCD display with new value. If out out of range, avoid OverFlowError crash
@@ -109,6 +135,10 @@ class CalculatorBrain:
             self.calculator.lcd.display("Er")
 
     def _full_reset(self):
-        """ Reset calculator """
-        self.display_value, self.first_number, self.second_number = 0, 0, 0
-        self._operator = ""
+        """ Reset all calculator attributes. """
+        self.display_value, self.first_number, self.second_number, self._operator = 0, 0, 0, ""
+        self.equals_pressed = False
+
+    def _zero_display(self):
+        """ Zero the display. """
+        self.display_value = 0
