@@ -41,7 +41,6 @@ class CalculatorBrain:
             self._update_lcd()
             self.equals_pressed = False
 
-        print(f"button {btn_id} pressed")
         if self.display_value == 0:
             self.display_value = btn_id
         else:
@@ -50,65 +49,57 @@ class CalculatorBrain:
     def _operator_pressed(self, btn_id):
         """ get the operator from an operator button pressed event. """
 
+        # Store the current display.
+        self._store_numbers()
+
+        # Division pressed.
+        if btn_id['operator'] == u"\u00F7":
+            self._operator = "/"
+        # Multiplication pressed.
+        elif btn_id['operator'] == u"\u00D7":
+            self._operator = "*"
+        # Subtraction pressed.
+        elif btn_id['operator'] == "-":
+            self._operator = "-"
+        # Addition pressed.
+        elif btn_id['operator'] == "+":
+            self._operator = "+"
+        # Equals pressed.
+        else:
+            self._perform_calculation()
+
+    def _store_numbers(self):
+        """ Assign the current number to its correct position. """
         if not self.first_number and not self._operator:
-            print(f"Saving first number {self.display_value}")
             self.first_number = self.display_value
             self._zero_display()
         else:
             self.second_number = self.display_value
-            print(f"Saving second number {self.display_value}")
-
-        # Division pressed.
-        if btn_id['operator'] == u"\u00F7":
-            self._operator = "//"
-            print("Division pressed")
-
-        # Multiplication pressed.
-        elif btn_id['operator'] == u"\u00D7":
-            self._operator = "*"
-            print("Multiplication button pressed")
-
-        # Subtraction pressed.
-        elif btn_id['operator'] == "-":
-            self._operator = "-"
-            print("Subtraction button pressed")
-
-        # Addition pressed.
-        elif btn_id['operator'] == "+":
-            self._operator = "+"
-            print("Addition button pressed")
-
-        # Equals pressed.
-        else:
-            print("Equals button pressed")
-            self._equals()
 
     def _misc_pressed(self, btn_id):
         """ Misc buttons pressed (C, decimal, plus/minus, percent). """
 
         # Reset button pressed.
         if btn_id['misc'] == 'C':
-            print("Reset button")
             self._full_reset()
 
         # Plus/Minus button pressed.
         if btn_id['misc'] == u"\u00B1":
-            print("Plus/Minus button")
             self.display_value = -int(self.display_value)
 
         # Percent button pressed.
         if btn_id['misc'] == "%":
             print("Percent button")
+            # Todo
 
         # Decimal button pressed.
         if btn_id['misc'] == ".":
-            print("Decimal button")
             if "." not in str(self.display_value):
                 display_string = str(self.display_value) + "."
                 self.display_value = str(display_string)
 
-    def _equals(self):
-        """ Equals pressed evaluate expression. """
+    def _perform_calculation(self):
+        """ Equals pressed - evaluate expression. """
         print(f"Sum to evaluate = {self.first_number}{self._operator}{self.second_number}")
         try:
             answer = eval(f"{self.first_number}{self._operator}{self.second_number}")
