@@ -1,6 +1,5 @@
-from PyQt5.QtWidgets import QApplication, QGridLayout, QWidget
+from PyQt5.QtWidgets import QApplication, QGridLayout
 from calculator_gui import CalculatorGui
-import PyQt5.QtWidgets
 
 from calculator_window import CalculatorWindow
 
