@@ -14,6 +14,12 @@ class CalculatorBrain:
     def button_tapped(self, btn_id):
         """ Process the button pressed. """
 
+        if self.equals_pressed:
+            self.first_number = self.display_value
+            self._zero_display()
+            self._update_lcd()
+            self.equals_pressed = False
+
         if self.display_value == "Er":
             self._full_reset()
 
@@ -23,23 +29,21 @@ class CalculatorBrain:
                 self._operator_pressed(btn_id)
 
             # Miscellaneous button pressed. ("%", ".", "plus/minus")
-            if 'misc' in btn_id.keys():
+            elif 'misc' in btn_id.keys():
                 self._misc_pressed(btn_id)
 
         # Number button pressed.
-        if type(btn_id) == int:
+        elif type(btn_id) == int:
             self._number_pressed(btn_id)
 
         # Update the display.
         self._update_lcd()
 
     def _number_pressed(self, btn_id):
-        """ get the int value from a number button pressed event and update display. """
-
-        if self.equals_pressed:
-            self._zero_display()
-            self._update_lcd()
-            self.equals_pressed = False
+        """
+        Number button pressed.
+        --- range (0 - 9)
+        """
 
         if self.display_value == 0:
             self.display_value = btn_id
@@ -47,7 +51,10 @@ class CalculatorBrain:
             self.display_value = f"{self.display_value}{btn_id}"
 
     def _operator_pressed(self, btn_id):
-        """ get the operator from an operator button pressed event. """
+        """
+        Operator button pressed.
+        --- ( /, *, +, - )
+        """
 
         # Store the current display.
         self._store_numbers()
@@ -68,6 +75,47 @@ class CalculatorBrain:
         else:
             self._perform_calculation()
 
+    def _misc_pressed(self, btn_id):
+        """
+        Misc buttons pressed
+        --- (C, decimal, plus/minus, percent).
+        """
+
+        # Reset button pressed.
+        if btn_id['misc'] == 'C':
+            # Reset all attributes.
+            self._full_reset()
+
+        # Plus/Minus button pressed.
+        if btn_id['misc'] == u"\u00B1":
+            # Toggle sign display (+/-).
+            self.display_value = -int(self.display_value)
+
+        # Percent button pressed.
+        if btn_id['misc'] == "%":
+            # Perform percent logic.
+            self._percent_button_logic()
+
+        # Decimal button pressed.
+        if btn_id['misc'] == ".":
+            # Add decimal point to display.
+            if "." not in str(self.display_value):
+                display_string = str(self.display_value) + "."
+                self.display_value = str(display_string)
+
+    def _percent_button_logic(self):
+        """ Perform logic and calculate when the percent button is tapped. """
+
+        if not self.first_number and not self._operator:
+            self.display_value = float(self.display_value) / 100.00
+
+        elif self.first_number and self._operator:
+            self.second_number = self.display_value
+            eval_string = f"{self.first_number}{self._operator}({self.first_number}*{self.second_number}/100)"
+            print(f"Sum to evaluate: {eval_string}")
+            self.display_value = eval(eval_string)
+            self.equals_pressed = True
+
     def _store_numbers(self):
         """ Assign the current number to its correct position. """
         if not self.first_number and not self._operator:
@@ -76,30 +124,10 @@ class CalculatorBrain:
         else:
             self.second_number = self.display_value
 
-    def _misc_pressed(self, btn_id):
-        """ Misc buttons pressed (C, decimal, plus/minus, percent). """
-
-        # Reset button pressed.
-        if btn_id['misc'] == 'C':
-            self._full_reset()
-
-        # Plus/Minus button pressed.
-        if btn_id['misc'] == u"\u00B1":
-            self.display_value = -int(self.display_value)
-
-        # Percent button pressed.
-        if btn_id['misc'] == "%":
-            print("Percent button")
-            # Todo
-
-        # Decimal button pressed.
-        if btn_id['misc'] == ".":
-            if "." not in str(self.display_value):
-                display_string = str(self.display_value) + "."
-                self.display_value = str(display_string)
-
     def _perform_calculation(self):
-        """ Equals pressed - evaluate expression. """
+        """ Equals pressed.
+        evaluate expression.
+        """
         print(f"Sum to evaluate = {self.first_number}{self._operator}{self.second_number}")
         try:
             answer = eval(f"{self.first_number}{self._operator}{self.second_number}")
@@ -112,7 +140,7 @@ class CalculatorBrain:
         self._prepare_for_input(answer)
 
     def _prepare_for_input(self, answer):
-        """ Prepare calculator for input after solving sum. """
+        """ Prepare calculator for input after evaluating sum. """
         self.first_number, self.second_number, self._operator = answer, 0, ""
         self.equals_pressed = True
 
