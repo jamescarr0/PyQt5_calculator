@@ -103,6 +103,9 @@ class CalculatorBrain:
         # Decimal button pressed.
         if btn_id['misc'] == ".":
             print("Decimal button")
+            if "." not in str(self.display_value):
+                display_string = str(self.display_value) + "."
+                self.display_value = str(display_string)
 
     def _equals(self):
         """ Equals pressed evaluate expression. """

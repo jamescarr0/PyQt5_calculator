@@ -13,7 +13,7 @@ class CalculatorLcd(QLCDNumber):
         """ Style the LCD display. """
         self.setNumDigits(11)
         foreground = QtGui.QColor(0, 0, 0)
-        background = QtGui.QColor(137, 207, 240)
+        background = QtGui.QColor(176, 223, 229)
         self.setAutoFillBackground(True)
         palette = self.palette()
 
