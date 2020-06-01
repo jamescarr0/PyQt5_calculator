@@ -2,6 +2,8 @@ from PyQt5.QtWidgets import QApplication, QGridLayout, QWidget
 from calculator_gui import CalculatorGui
 import PyQt5.QtWidgets
 
+from calculator_window import CalculatorWindow
+
 
 class Calculator:
     """ A general class to manage the calculator app. """
@@ -11,8 +13,7 @@ class Calculator:
         self.app.setStyle('Fusion')
         self.layout = QGridLayout()
         self.layout.setSpacing(0)
-        self.window = QWidget()
-        self.window.setFixedSize(320, 460)
+        self.window = CalculatorWindow()
         CalculatorGui(self.window, self.layout)
         self.window.setLayout(self.layout)
         self.window.show()
@@ -20,5 +21,4 @@ class Calculator:
 
 
 if __name__ == "__main__":
-    print(PyQt5.QtWidgets.QStyleFactory.keys())
     calc = Calculator()
